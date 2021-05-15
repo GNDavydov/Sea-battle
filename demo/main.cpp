@@ -34,8 +34,8 @@ int main() {
         playerField.display();
         compField.display();
 
-        while (!playerField.is_end() && !compField.is_end()) {
-            if (compField.move()){
+        while (!playerField.is_end()) {
+            if (compField.move() && !compField.is_end()){
                 do {
                     usleep(1000000);
                     ai.adjustment(playerField.get_square());
