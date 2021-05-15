@@ -38,7 +38,7 @@ F2 - Перевернуть корабль
 
 Backspace - Выйти из игры
 
-##Пример игры
+## Пример игры
 ![alt text](./src/Place_ships.png)
 ![alt text](./src/Battle_1.png)
 ![alt text](./src/Battle_2.png)
