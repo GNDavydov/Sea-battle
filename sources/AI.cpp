@@ -3,12 +3,12 @@
 #include "AI.h"
 
 AI::AI() noexcept: curr_x(rand() % 10), curr_y(rand() % 10), direction('u'), hit_x(0), hit_y(0), hit(false) {
-    for (int i = 0; i < 10; ++i) {
+    for (size_t i = 0; i < 10; ++i) {
         std::fill(square_[i].begin(), square_[i].end(), symbols::unknown);
     }
 }
 
-void AI::adjustment(const std::array<std::array<char, 10>, 10> square) {
+void AI::adjustment(const std::array<std::array<char, 10>, 10> &square) {
     if (hit) {
         if (square[curr_x][curr_y] == symbols::miss) {
             if (direction == 'u') {
@@ -224,7 +224,7 @@ void AI::generate_square() {
     int y;
     bool position;
 
-    for (int i = 0; i < 10; ++i) {
+    for (size_t i = 0; i < 10; ++i) {
         do {
             x = rand() % 10;
             y = rand() % 10;
@@ -246,4 +246,4 @@ int AI::get_y() const {
     return curr_y;
 }
 
-AI::~AI() = default;
+AI::~AI() noexcept = default;

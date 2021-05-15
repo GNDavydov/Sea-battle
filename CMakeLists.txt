@@ -12,7 +12,8 @@ add_library(${PROJECT_NAME} STATIC
         ${CMAKE_CURRENT_SOURCE_DIR}/
         sources/placing_ships.cpp
         sources/player_field.cpp
-        sources/AI.cpp)
+        sources/AI.cpp
+        sources/comp_field.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"

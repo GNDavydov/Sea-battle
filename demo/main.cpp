@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "AI.h"
+#include "comp_field.h"
 #include "player_field.h"
 #include "placing_ships.h"
 
@@ -27,13 +28,22 @@ int main() {
     if (place.place_ships()) {
         AI ai;
         ai.generate_square();
-        player_field playerField(0, 0, ai.get_square());
+        comp_field compField(50, 0, ai.get_square());
+        player_field playerField(0, 0, place.get_square());
+
         playerField.display();
-        getch();
-        while (!playerField.is_end()) {
-            usleep(1000000);
-            ai.adjustment(playerField.get_square());
-            playerField.shot(ai.get_x(), ai.get_y());
+        compField.display();
+
+        while (!playerField.is_end() && !compField.is_end()) {
+            if (compField.move()){
+                do {
+                    usleep(1000000);
+                    ai.adjustment(playerField.get_square());
+                } while (playerField.shot(ai.get_x(), ai.get_y()));
+            }
+            else {
+                break;
+            }
         }
     }
     getch();

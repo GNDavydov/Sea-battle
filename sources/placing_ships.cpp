@@ -100,7 +100,6 @@ void placing_ships::place_ship(const int len, const bool position) {
 bool placing_ships::place_ships() {
     bool position = true;
     for (size_t i = 0; i < 10;) {
-        clear();
         display();
         int ch = getch();
         switch (ch) {
@@ -139,8 +138,8 @@ bool placing_ships::place_ships() {
 void placing_ships::display() const {
     refresh();
     box(win_, 0, 0);
-    for (int i = 0; i < 10; ++i) {
-        for (int j = 0; j < 10; ++j) {
+    for (size_t i = 0; i < 10; ++i) {
+        for (size_t j = 0; j < 10; ++j) {
             if (i == curr_x_ && j == curr_y_) {
                 start_color();
                 init_pair(1, COLOR_CYAN, COLOR_BLACK);

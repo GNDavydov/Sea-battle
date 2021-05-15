@@ -22,7 +22,7 @@ private:
 public:
     AI() noexcept;
 
-    void adjustment(const std::array<std::array<char, 10>, 10> square);
+    void adjustment(const std::array<std::array<char, 10>, 10> &square);
 
     void generate_square();
 

@@ -1,46 +1,85 @@
 // Copyright 2021 GNDavydov
 
-#include "player_field.h"
+#include "comp_field.h"
 
-player_field::player_field(const int start_x, const int start_y,
-                                    const std::array<std::array<char, 10>, 10> &square) noexcept: start_x_(start_x),
-                                                                                                  start_y_(start_y),
-                                                                                                  square_(square), win_(
-                newwin(height_, width_, start_y_, start_x_)) {
+comp_field::comp_field(int start_x, int start_y, const std::array<std::array<char, 10>, 10> &square) noexcept: start_x_
+                                                                                                                       (start_x),
+                                                                                                               start_y_(
+                                                                                                                       start_y),
+                                                                                                               win_(newwin(
+                                                                                                                       height_,
+                                                                                                                       width_,
+                                                                                                                       start_y_,
+                                                                                                                       start_x_)) {
     for (size_t i = 0; i < 10; ++i) {
         for (size_t j = 0; j < 10; ++j) {
-            if (square_[i][j] == symbols::miss) {
+            if (square[i][j] == symbols::miss) {
                 square_[i][j] = symbols::unknown;
+            } else {
+                square_[i][j] = square[i][j];
             }
         }
     }
 }
 
-void player_field::display() const {
+void comp_field::move_up() {
+    if (curr_x_ != 0) {
+        --curr_x_;
+    }
+}
+
+void comp_field::move_down() {
+    if (curr_x_ != 9) {
+        ++curr_x_;
+    }
+}
+
+void comp_field::move_left() {
+    if (curr_y_ != 0) {
+        --curr_y_;
+    }
+}
+
+void comp_field::move_right() {
+    if (curr_y_ != 9) {
+        ++curr_y_;
+    }
+}
+
+void comp_field::display() const {
+    std::array<std::array<char, 10>, 10> square;
+    for (size_t i = 0; i < 10; ++i) {
+        for (size_t j = 0; j < 10; ++j) {
+            if (square_[i][j] == symbols::ship) {
+                square[i][j] = symbols::unknown;
+            } else {
+                square[i][j] = square_[i][j];
+            }
+        }
+    }
+
     refresh();
     box(win_, 0, 0);
     for (size_t i = 0; i < 10; ++i) {
         for (size_t j = 0; j < 10; ++j) {
-            mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
+            if (i == curr_x_ && j == curr_y_) {
+                start_color();
+                init_pair(1, COLOR_CYAN, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(1));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square[i][j]);
+                wattroff(win_, COLOR_PAIR(1));
+                use_default_colors();
+            } else {
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square[i][j]);
+            }
         }
     }
     wrefresh(win_);
 }
 
-bool player_field::is_end() const {
-    for (size_t i = 0; i < 10; ++i) {
-        for (size_t j = 0; j < 10; ++j) {
-            if (square_[i][j] == symbols::ship) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-bool player_field::is_dead(const int x, const int y) const {
-    int curr_x = x;
-    int curr_y = y;
+bool comp_field::is_dead() const {
+    int curr_x = curr_x_;
+    int curr_y = curr_y_;
     while (true) {
         ++curr_y;
         try {
@@ -54,7 +93,7 @@ bool player_field::is_dead(const int x, const int y) const {
             break;
         }
     }
-    curr_y = y;
+    curr_y = curr_y_;
     while (true) {
         --curr_y;
         try {
@@ -68,7 +107,7 @@ bool player_field::is_dead(const int x, const int y) const {
             break;
         }
     }
-    curr_y = y;
+    curr_y = curr_y_;
     while (true) {
         --curr_x;
         try {
@@ -82,7 +121,7 @@ bool player_field::is_dead(const int x, const int y) const {
             break;
         }
     }
-    curr_x = x;
+    curr_x = curr_x_;
     while (true) {
         ++curr_x;
         try {
@@ -99,9 +138,9 @@ bool player_field::is_dead(const int x, const int y) const {
     return true;
 }
 
-void player_field::dead(const int x, const int y) {
-    int curr_x = x;
-    int curr_y = y;
+void comp_field::dead() {
+    int curr_x = curr_x_;
+    int curr_y = curr_y_;
     bool direction = false;
     while (true) {
         --curr_y;
@@ -140,7 +179,8 @@ void player_field::dead(const int x, const int y) {
         }
         while (true) {
             try {
-                if (square_.at(curr_x).at(curr_y) == symbols::unknown || square_.at(curr_x).at(curr_y) == symbols::miss) {
+                if (square_.at(curr_x).at(curr_y) == symbols::unknown ||
+                    square_.at(curr_x).at(curr_y) == symbols::miss) {
                     break;
                 }
             } catch (std::out_of_range &e) {
@@ -160,8 +200,7 @@ void player_field::dead(const int x, const int y) {
                 square_.at(curr_x).at(curr_y + i) = symbols::miss;
             } catch (std::out_of_range &e) {}
         }
-    }
-    else {
+    } else {
         for (int i = -1; i < 2; ++i) {
             try {
                 square_.at(curr_x + i).at(curr_y - 1) = symbols::miss;
@@ -169,7 +208,8 @@ void player_field::dead(const int x, const int y) {
         }
         while (true) {
             try {
-                if (square_.at(curr_x).at(curr_y) == symbols::unknown || square_.at(curr_x).at(curr_y) == symbols::miss) {
+                if (square_.at(curr_x).at(curr_y) == symbols::unknown ||
+                    square_.at(curr_x).at(curr_y) == symbols::miss) {
                     break;
                 }
             } catch (std::out_of_range &e) {
@@ -190,38 +230,68 @@ void player_field::dead(const int x, const int y) {
             } catch (std::out_of_range &e) {}
         }
     }
-
 }
 
-bool player_field::shot(const int x, const int y) {
-    if (square_[x][y] == symbols::ship) {
-        square_[x][y] = symbols::injured;
-        if (is_dead(x, y)) {
-            dead(x, y);
+bool comp_field::is_end() const {
+    for (size_t i = 0; i < 10; ++i) {
+        for (size_t j = 0; j < 10; ++j) {
+            if (square_[i][j] == symbols::ship) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool comp_field::shot() {
+    if (square_[curr_x_][curr_y_] == symbols::ship) {
+        square_[curr_x_][curr_y_] = symbols::injured;
+        if (is_dead()) {
+            dead();
         }
         display();
         return true;
     }
-    square_[x][y] = symbols::miss;
+    if (square_[curr_x_][curr_y_] == symbols::injured || square_[curr_x_][curr_y_] == symbols::killed ||
+        square_[curr_x_][curr_y_] == symbols::miss) {
+        return true;
+    }
+    square_[curr_x_][curr_y_] = symbols::miss;
     display();
     return false;
 }
 
-std::array<std::array<char, 10>, 10> player_field::get_square() const {
-    std::array<std::array<char, 10>, 10> square;
-    for (size_t i = 0; i < 10; ++i) {
-        for (size_t j = 0; j < 10; ++j) {
-            if (square_[i][j] == symbols::ship) {
-                square[i][j] = symbols::unknown;
-            }
-            else {
-                square[i][j] = square_[i][j];
-            }
+bool comp_field::move() {
+    while (true) {
+        display();
+        int ch = getch();
+        switch (ch) {
+            case KEY_UP:
+                move_up();
+                break;
+            case KEY_DOWN:
+                move_down();
+                break;
+            case KEY_LEFT:
+                move_left();
+                break;
+            case KEY_RIGHT:
+                move_right();
+                break;
+            case KEY_F(1):
+                if (!shot()){
+                    return true;
+                }
+                break;
+            case KEY_BACKSPACE:
+                clear();
+                return false;
+            default:
+                break;
         }
     }
-    return square;
 }
 
-player_field::~player_field() noexcept {
+comp_field::~comp_field() noexcept {
     delwin(win_);
 }
