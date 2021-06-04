@@ -62,16 +62,34 @@ void comp_field::display() const {
     box(win_, 0, 0);
     for (size_t i = 0; i < 10; ++i) {
         for (size_t j = 0; j < 10; ++j) {
+            start_color();
             if (i == curr_x_ && j == curr_y_) {
-                start_color();
-                init_pair(1, COLOR_CYAN, COLOR_BLACK);
-                wattron(win_, COLOR_PAIR(1));
+                init_pair(10, COLOR_WHITE, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(10));
                 mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square[i][j]);
-                wattroff(win_, COLOR_PAIR(1));
-                use_default_colors();
+                wattroff(win_, COLOR_PAIR(10));
+            } else if (square[i][j] == symbols::injured) {
+                init_pair(11, COLOR_YELLOW, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(11));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square[i][j]);
+                wattroff(win_, COLOR_PAIR(11));
+            } else if (square[i][j] == symbols::killed) {
+                init_pair(12, COLOR_GREEN, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(12));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square[i][j]);
+                wattroff(win_, COLOR_PAIR(12));
+            } else if (square[i][j] == symbols::miss) {
+                init_pair(13, COLOR_RED, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(13));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square[i][j]);
+                wattroff(win_, COLOR_PAIR(13));
             } else {
+                init_pair(14, COLOR_BLUE, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(14));
                 mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square[i][j]);
+                wattroff(win_, COLOR_PAIR(14));
             }
+            use_default_colors();
         }
     }
     wrefresh(win_);
@@ -264,6 +282,9 @@ bool comp_field::shot() {
 bool comp_field::move() {
     while (true) {
         display();
+        if (is_end()){
+            return false;
+        }
         int ch = getch();
         switch (ch) {
             case KEY_UP:
@@ -279,7 +300,7 @@ bool comp_field::move() {
                 move_right();
                 break;
             case KEY_F(1):
-                if (!shot()){
+                if (!shot()) {
                     return true;
                 }
                 break;

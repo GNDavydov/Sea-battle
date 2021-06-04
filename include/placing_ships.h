@@ -17,6 +17,7 @@ private:
     int curr_x_ = 0;
     int curr_y_ = 0;
     WINDOW *win_;
+    WINDOW *win_ships;
 
     void move_up();
 
@@ -30,9 +31,10 @@ private:
 
     bool check_ship(int len, bool position) const;
 
-
 public:
     placing_ships(int start_x, int start_y) noexcept;
+
+    void display_ship(int len, bool direction) const;
 
     void display() const;
 

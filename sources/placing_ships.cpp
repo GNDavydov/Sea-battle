@@ -4,7 +4,10 @@
 
 placing_ships::placing_ships(const int start_x, const int start_y) noexcept: start_x_(start_x), start_y_(start_y),
                                                                              win_(newwin(height_, width_, start_y_,
-                                                                                         start_x_)) {
+                                                                                         start_x_)),
+                                                                             win_ships(newwin(12, 18,
+                                                                                              start_y_,
+                                                                                              start_x_ + width_ + 5)) {
     for (size_t i = 0; i < 10; ++i) {
         std::fill(square_[i].begin(), square_[i].end(), symbols::unknown);
     }
@@ -97,10 +100,71 @@ void placing_ships::place_ship(const int len, const bool position) {
     }
 }
 
+void placing_ships::display_ship(const int len, const bool direction) const {
+    refresh();
+    box(win_ships, 0, 0);
+    if (direction) {
+        for (size_t i = 0; i < 4; ++i) {
+            for (size_t j = 0; j < 4; ++j) {
+                if (i < len && j == 0) {
+                    mvwprintw(win_ships, 2 * i + 2, 2, "%c", symbols::ship);
+                } else {
+                    mvwprintw(win_ships, 2 * i + 2, 4 * j + 2, "%c", symbols::unknown);
+                }
+            }
+        }
+    } else {
+        for (size_t i = 0; i < 4; ++i) {
+            for (size_t j = 0; j < 4; ++j) {
+                if (j < len && i == 0) {
+                    mvwprintw(win_ships, 2, 4 * j + 2, "%c", symbols::ship);
+                } else {
+                    mvwprintw(win_ships, 2 * i + 2, 4 * j + 2, "%c", symbols::unknown);
+                }
+            }
+        }
+    }
+    wrefresh(win_ships);
+}
+
+void placing_ships::display() const {
+    refresh();
+    box(win_, 0, 0);
+    for (size_t i = 0; i < 10; ++i) {
+        for (size_t j = 0; j < 10; ++j) {
+            start_color();
+            if (i == curr_x_ && j == curr_y_) {
+                init_pair(1, COLOR_WHITE, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(1));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
+                wattroff(win_, COLOR_PAIR(1));
+            } else if (square_[i][j] == symbols::ship) {
+                init_pair(2, COLOR_GREEN, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(2));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
+                wattroff(win_, COLOR_PAIR(2));
+            } else if (square_[i][j] == symbols::miss) {
+                init_pair(3, COLOR_RED, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(3));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
+                wattroff(win_, COLOR_PAIR(3));
+            } else {
+                init_pair(4, COLOR_BLUE, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(4));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
+                wattroff(win_, COLOR_PAIR(4));
+            }
+            use_default_colors();
+        }
+    }
+    wrefresh(win_);
+}
+
 bool placing_ships::place_ships() {
     bool position = true;
     for (size_t i = 0; i < 10;) {
         display();
+        display_ship(ships[i], position);
         int ch = getch();
         switch (ch) {
             case KEY_UP:
@@ -135,30 +199,11 @@ bool placing_ships::place_ships() {
     return true;
 }
 
-void placing_ships::display() const {
-    refresh();
-    box(win_, 0, 0);
-    for (size_t i = 0; i < 10; ++i) {
-        for (size_t j = 0; j < 10; ++j) {
-            if (i == curr_x_ && j == curr_y_) {
-                start_color();
-                init_pair(1, COLOR_CYAN, COLOR_BLACK);
-                wattron(win_, COLOR_PAIR(1));
-                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
-                wattroff(win_, COLOR_PAIR(1));
-                use_default_colors();
-            } else {
-                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
-            }
-        }
-    }
-    wrefresh(win_);
-}
-
 std::array<std::array<char, 10>, 10> placing_ships::get_square() const {
     return square_;
 }
 
 placing_ships::~placing_ships() noexcept {
     delwin(win_);
+    delwin(win_ships);
 }

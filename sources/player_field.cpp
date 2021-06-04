@@ -3,9 +3,9 @@
 #include "player_field.h"
 
 player_field::player_field(const int start_x, const int start_y,
-                                    const std::array<std::array<char, 10>, 10> &square) noexcept: start_x_(start_x),
-                                                                                                  start_y_(start_y),
-                                                                                                  square_(square), win_(
+                           const std::array<std::array<char, 10>, 10> &square) noexcept: start_x_(start_x),
+                                                                                         start_y_(start_y),
+                                                                                         square_(square), win_(
                 newwin(height_, width_, start_y_, start_x_)) {
     for (size_t i = 0; i < 10; ++i) {
         for (size_t j = 0; j < 10; ++j) {
@@ -21,7 +21,34 @@ void player_field::display() const {
     box(win_, 0, 0);
     for (size_t i = 0; i < 10; ++i) {
         for (size_t j = 0; j < 10; ++j) {
-            mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
+            start_color();
+            if (square_[i][j] == symbols::ship) {
+                init_pair(20, COLOR_GREEN, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(20));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
+                wattroff(win_, COLOR_PAIR(20));
+            } else if (square_[i][j] == symbols::injured) {
+                init_pair(21, COLOR_YELLOW, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(21));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
+                wattroff(win_, COLOR_PAIR(21));
+            } else if (square_[i][j] == symbols::killed) {
+                init_pair(22, COLOR_RED, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(22));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
+                wattroff(win_, COLOR_PAIR(22));
+            } else if (square_[i][j] == symbols::miss) {
+                init_pair(23, COLOR_WHITE, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(23));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
+                wattroff(win_, COLOR_PAIR(23));
+            } else {
+                init_pair(24, COLOR_BLUE, COLOR_BLACK);
+                wattron(win_, COLOR_PAIR(24));
+                mvwprintw(win_, 2 * i + 2, 4 * j + 2, "%c", square_[i][j]);
+                wattroff(win_, COLOR_PAIR(24));
+            }
+            use_default_colors();
         }
     }
     wrefresh(win_);
@@ -140,7 +167,8 @@ void player_field::dead(const int x, const int y) {
         }
         while (true) {
             try {
-                if (square_.at(curr_x).at(curr_y) == symbols::unknown || square_.at(curr_x).at(curr_y) == symbols::miss) {
+                if (square_.at(curr_x).at(curr_y) == symbols::unknown ||
+                    square_.at(curr_x).at(curr_y) == symbols::miss) {
                     break;
                 }
             } catch (std::out_of_range &e) {
@@ -160,8 +188,7 @@ void player_field::dead(const int x, const int y) {
                 square_.at(curr_x).at(curr_y + i) = symbols::miss;
             } catch (std::out_of_range &e) {}
         }
-    }
-    else {
+    } else {
         for (int i = -1; i < 2; ++i) {
             try {
                 square_.at(curr_x + i).at(curr_y - 1) = symbols::miss;
@@ -169,7 +196,8 @@ void player_field::dead(const int x, const int y) {
         }
         while (true) {
             try {
-                if (square_.at(curr_x).at(curr_y) == symbols::unknown || square_.at(curr_x).at(curr_y) == symbols::miss) {
+                if (square_.at(curr_x).at(curr_y) == symbols::unknown ||
+                    square_.at(curr_x).at(curr_y) == symbols::miss) {
                     break;
                 }
             } catch (std::out_of_range &e) {
@@ -213,8 +241,7 @@ std::array<std::array<char, 10>, 10> player_field::get_square() const {
         for (size_t j = 0; j < 10; ++j) {
             if (square_[i][j] == symbols::ship) {
                 square[i][j] = symbols::unknown;
-            }
-            else {
+            } else {
                 square[i][j] = square_[i][j];
             }
         }
